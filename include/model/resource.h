@@ -23,7 +23,7 @@ namespace de::mabiphmo::uService::model{
 		std::vector<resource_type> types = std::vector<resource_type>();
 		std::string scope = std::string();
 
-		virtual void operator ()(session &&session_) = 0;
+		virtual void run(session &&session_, boost::beast::http::request_parser<boost::beast::http::empty_body> &&request_parser) = 0;
 	};
 }
 

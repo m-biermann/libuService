@@ -15,7 +15,6 @@ namespace de::mabiphmo::uService::model{
 	struct session{
 		boost::beast::ssl_stream<boost::beast::tcp_stream> stream;
 		boost::asio::ip::tcp::endpoint endpoint;
-		boost::beast::http::request_parser<boost::beast::http::empty_body> request_parser;
 	};
 }
 

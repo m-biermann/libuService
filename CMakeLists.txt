@@ -3,7 +3,7 @@ project(libuService)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(libuService src/dummy.cpp include/settings.h include/model/resource.h include/model/server.h include/model/session.h)
+add_library(libuService src/dummy.cpp include/settings.h include/model/resource.h include/model/server.h include/model/session.h include/model/resource_typed_body.h include/model/listener.h)
 
 include_directories(include)
 
