@@ -10,27 +10,26 @@
 
 namespace de::mabiphmo::uService::model{
 	class server{
-		settings_struct settings = settings_struct();
+		settings settings_;
 	public:
-		server()= default;
-		explicit server(settings_struct &&settings_) : settings(std::move(settings_)) {}
+		explicit server(settings &&settings) : settings_(std::move(settings)) {}
 		void start(){
-			assert(!settings.resources.empty() && "No resources defined");
-			assert(settings.thread_num > 0 && "No threads?");
-			assert(!settings.service_id.empty() && "No service id defined");
-			assert(!settings.service_secret.empty() && "No service secret defined");
+			assert(!settings_.resources.empty() && "No resources defined");
+			assert(settings_.thread_num > 0 && "No threads?");
+			assert(!settings_.service_id.empty() && "No service id defined");
+			assert(!settings_.service_secret.empty() && "No service secret defined");
 
-			assert(!settings.hostname.empty() && "No hostname defined");
+			assert(!settings_.hostname.empty() && "No hostname defined");
 
 			//IO Context for all I/O
-			boost::asio::io_context ioc(settings.thread_num);
+			boost::asio::io_context ioc(settings_.thread_num);
 
 			//TODO: init auth stuff and create listener
 
 			//run I/O on threads
 			std::vector<std::thread> v;
-			v.reserve(settings.thread_num - 1);
-			for(uint i = settings.thread_num - 1; i > 0; --i){
+			v.reserve(settings_.thread_num - 1);
+			for(uint i = settings_.thread_num - 1; i > 0; --i){
 				v.emplace_back(
 						[&ioc]
 						{

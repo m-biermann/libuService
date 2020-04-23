@@ -12,41 +12,45 @@
 #include <iostream>
 #include <boost/beast/core/bind_handler.hpp>
 #include <boost/asio/strand.hpp>
+#include "session.h"
 
 namespace de::mabiphmo::uService::model{
 	class listener : public std::enable_shared_from_this<listener>{
-		boost::asio::io_context &ioc;
-		boost::asio::ssl::context &ssl_context;
-		boost::asio::ip::tcp::acceptor acceptor;
+		boost::asio::io_context &ioc_;
+		boost::asio::ssl::context ssl_context_;
+		boost::asio::ip::tcp::acceptor acceptor_;
+		settings &settings_;
 	public:
-		listener(boost::asio::io_context &ioc_,
-				boost::asio::ssl::context &ssl_context_,
-				boost::asio::ip::tcp::endpoint endpoint_)
-				: ioc(ioc_),
-				ssl_context(ssl_context_),
-				acceptor(ioc_)
+		listener(boost::asio::io_context &ioc,
+				boost::asio::ssl::context &&ssl_context,
+				const boost::asio::ip::tcp::endpoint& endpoint,
+				settings &settings)
+				: ioc_(ioc),
+				  ssl_context_(std::move(ssl_context)),
+				  acceptor_(ioc),
+				  settings_(settings)
 		{
 			boost::beast::error_code ec;
 
-			acceptor.open(endpoint_.protocol(), ec);
+			acceptor_.open(endpoint.protocol(), ec);
 			if(ec){
 				std::cerr << "open failed: " << ec.message() << std::endl;
 				return;
 			}
 
-			acceptor.set_option(boost::asio::socket_base::reuse_address(true), ec);
+			acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
 			if(ec){
 				std::cerr << "address reuse failed: " << ec.message() << std::endl;
 				return;
 			}
 
-			acceptor.bind(endpoint_, ec);
+			acceptor_.bind(endpoint, ec);
 			if(ec){
 				std::cerr << "bind failed: " << ec.message() << std::endl;
 				return;
 			}
 
-			acceptor.listen(boost::asio::socket_base::max_listen_connections, ec);
+			acceptor_.listen(boost::asio::socket_base::max_listen_connections, ec);
 			if(ec){
 				std::cerr << "listen failed: " << ec.message() << std::endl;
 				return;
@@ -59,16 +63,18 @@ namespace de::mabiphmo::uService::model{
 
 	private:
 		void do_accept(){
-			acceptor.async_accept(boost::asio::make_strand(ioc),
-					boost::beast::bind_front_handler(&listener::on_accept, shared_from_this()));
+			acceptor_.async_accept(boost::asio::make_strand(ioc_),
+								   boost::beast::bind_front_handler(
+							&listener::on_accept,
+							shared_from_this()));
 		}
 
-		void on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket){
-			if(ec){
-				std::cerr << "accept failed: " << ec.message() << std::endl;
+		void on_accept(boost::beast::error_code ec_, boost::asio::ip::tcp::socket socket_){
+			if(ec_){
+				std::cerr << "accept failed: " << ec_.message() << std::endl;
 			}
 			else{
-				//TODO
+				std::make_shared<session>(std::move(socket_), ssl_context_, settings_)->run();
 			}
 
 			do_accept();

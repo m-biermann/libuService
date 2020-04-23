@@ -10,7 +10,7 @@
 #include <string>
 
 namespace de::mabiphmo::uService{
-	struct settings_struct{
+	struct settings{
 		std::vector<model::resource> resources = std::vector<model::resource>();
 		uint thread_num = 10;
 
