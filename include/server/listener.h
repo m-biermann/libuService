@@ -14,17 +14,17 @@
 #include <boost/asio/strand.hpp>
 #include "session.h"
 
-namespace de::mabiphmo::uService::model{
-	class listener : public std::enable_shared_from_this<listener>{
+namespace de::mabiphmo::uService::server {
+	class listener : public std::enable_shared_from_this<listener> {
 		boost::asio::io_context &ioc_;
 		boost::asio::ssl::context ssl_context_;
 		boost::asio::ip::tcp::acceptor acceptor_;
 		settings &settings_;
 	public:
 		listener(boost::asio::io_context &ioc,
-				boost::asio::ssl::context &&ssl_context,
-				const boost::asio::ip::tcp::endpoint& endpoint,
-				settings &settings)
+				 boost::asio::ssl::context &&ssl_context,
+				 const boost::asio::ip::tcp::endpoint &endpoint,
+				 settings &settings)
 				: ioc_(ioc),
 				  ssl_context_(std::move(ssl_context)),
 				  acceptor_(ioc),

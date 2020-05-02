@@ -7,10 +7,11 @@
 
 #include "resource.h"
 
-namespace de::mabiphmo::uService::model{
+namespace de::mabiphmo::uService::resources {
 	template<class Body>
-	struct resource_typed_body : resource{
-		void run(session &&session_, boost::beast::http::request_parser<boost::beast::http::empty_body> &&request_parser) override{
+	struct resource_typed_body : resource {
+		void run(session &&session_,
+				 boost::beast::http::request_parser<boost::beast::http::empty_body> &&request_parser) override {
 			run(session_, boost::beast::http::request_parser<Body>(request_parser));
 		}
 

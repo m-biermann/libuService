@@ -8,12 +8,13 @@
 #include <settings.h>
 #include <thread>
 
-namespace de::mabiphmo::uService::model{
-	class server{
+namespace de::mabiphmo::uService::server {
+	class server {
 		settings settings_;
 	public:
 		explicit server(settings &&settings) : settings_(std::move(settings)) {}
-		void start(){
+
+		void start() {
 			assert(!settings_.resources.empty() && "No resources defined");
 			assert(settings_.thread_num > 0 && "No threads?");
 			assert(!settings_.service_id.empty() && "No service id defined");
@@ -41,4 +42,4 @@ namespace de::mabiphmo::uService::model{
 	};
 }
 
-#endif //LIBUSERVICE_SERVER_H
+#endif //LIBUSERVICE_AUTH_SERVICE_H

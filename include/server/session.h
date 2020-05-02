@@ -12,8 +12,8 @@
 #include <boost/beast/http/parser.hpp>
 #include <settings.h>
 
-namespace de::mabiphmo::uService::model{
-	class session{
+namespace de::mabiphmo::uService::server {
+	class session {
 		boost::beast::ssl_stream<boost::beast::tcp_stream> stream_;
 		settings &settings_;
 
@@ -21,8 +21,7 @@ namespace de::mabiphmo::uService::model{
 		session(boost::asio::ip::tcp::socket &&socket,
 				boost::asio::ssl::context &ssl_context, settings &settings)
 				: stream_(std::move(socket), ssl_context),
-				  settings_(settings)
-		{
+				  settings_(settings) {
 		}
 		void run(){
 			//TODO
