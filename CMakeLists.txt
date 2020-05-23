@@ -3,7 +3,7 @@ project(libuService)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(libuService src/dummy.cpp include/settings.h include/resources/resource.h include/server/server.h include/server/session.h include/resources/resource_typed_body.h include/server/listener.h include/auth/auth_service.h include/auth/bearer_token.h)
+add_library(libuService src/dummy.cpp include/de.mabiphmo/uService/settings.h include/de.mabiphmo/uService/resources/resource.h include/de.mabiphmo/uService/server/server.h include/de.mabiphmo/uService/server/session.h include/de.mabiphmo/uService/resources/resource_typed_body.h include/de.mabiphmo/uService/server/listener.h include/de.mabiphmo/uService/auth/auth_service.h include/de.mabiphmo/uService/auth/bearer_token.h)
 
 include_directories(include)
 

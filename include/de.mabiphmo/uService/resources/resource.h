@@ -7,7 +7,7 @@
 
 #include <string>
 #include <boost/beast/http.hpp>
-#include "server/session.h"
+#include "de.mabiphmo/uService/server/session.h"
 
 namespace de::mabiphmo::uService::resources {
 	enum class resource_type {

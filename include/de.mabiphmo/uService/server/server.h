@@ -5,7 +5,7 @@
 #ifndef LIBUSERVICE_SERVER_H
 #define LIBUSERVICE_SERVER_H
 
-#include <settings.h>
+#include <de.mabiphmo/uService/settings.h>
 #include <thread>
 
 namespace de::mabiphmo::uService::server {

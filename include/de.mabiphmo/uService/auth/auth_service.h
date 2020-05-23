@@ -7,7 +7,7 @@
 
 #include <string>
 #include <boost/asio/ip/tcp.hpp>
-#include <settings.h>
+#include <de.mabiphmo/uService/settings.h>
 #include <boost/asio/strand.hpp>
 #include <iostream>
 #include "bearer_token.h"

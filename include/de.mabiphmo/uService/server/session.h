@@ -10,7 +10,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/http/empty_body.hpp>
 #include <boost/beast/http/parser.hpp>
-#include <settings.h>
+#include <de.mabiphmo/uService/settings.h>
 
 namespace de::mabiphmo::uService::server {
 	class session {
