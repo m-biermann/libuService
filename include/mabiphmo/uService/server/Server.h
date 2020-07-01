@@ -5,15 +5,15 @@
 #ifndef LIBUSERVICE_SERVER_H
 #define LIBUSERVICE_SERVER_H
 
-#include <de.mabiphmo/uService/settings.h>
-#include <de.mabiphmo/uService/auth/auth_service.h>
-#include "listener.h"
+#include <mabiphmo/uService/settings.h>
+#include <mabiphmo/uService/auth/AuthService.h>
+#include "Listener.h"
 
-namespace de::mabiphmo::uService::server {
-	class server {
+namespace mabiphmo::uService::server {
+	class Server {
 		settings settings_;
 	public:
-		explicit server(settings &&settings) : settings_(std::move(settings)) {}
+		explicit Server(settings &&settings) : settings_(std::move(settings)) {}
 
 		void start() {
 			assert(!settings_.resources.empty() && "No resources defined");
@@ -29,7 +29,7 @@ namespace de::mabiphmo::uService::server {
 			//actually start the server
 			auth_service auth(settings_, ioc);
 			//TODO: ssl::context, tcp::endpoint
-			listener listen(ioc, std::move(boost::asio::ssl::context()), boost::asio::ip::tcp::endpoint(), settings_);
+			Listener listen(ioc, std::move(boost::asio::ssl::context()), boost::asio::ip::tcp::endpoint(), settings_);
 
 			//run I/O on threads
 			std::vector<std::thread> v;
@@ -46,4 +46,4 @@ namespace de::mabiphmo::uService::server {
 	};
 }
 
-#endif //LIBUSERVICE_AUTH_SERVICE_H
+#endif //LIBUSERVICE_AUTHSERVICE_H

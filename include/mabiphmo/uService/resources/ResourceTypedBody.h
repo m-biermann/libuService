@@ -2,14 +2,14 @@
 // Created by max on 4/19/20.
 //
 
-#ifndef LIBUSERVICE_RESOURCE_TYPED_BODY_H
-#define LIBUSERVICE_RESOURCE_TYPED_BODY_H
+#ifndef LIBUSERVICE_RESOURCETYPEDBODY_H
+#define LIBUSERVICE_RESOURCETYPEDBODY_H
 
-#include "resource.h"
+#include "Resource.h"
 
-namespace de::mabiphmo::uService::resources {
+namespace mabiphmo::uService::resources {
 	template<class Body>
-	struct resource_typed_body : resource {
+	struct ResourceTypedBody : Resource {
 		void run(session &&session_,
 				 boost::beast::http::request_parser<boost::beast::http::empty_body> &&request_parser) override {
 			run(session_, boost::beast::http::request_parser<Body>(request_parser));
@@ -19,4 +19,4 @@ namespace de::mabiphmo::uService::resources {
 	};
 }
 
-#endif //LIBUSERVICE_RESOURCE_TYPED_BODY_H
+#endif //LIBUSERVICE_RESOURCETYPEDBODY_H

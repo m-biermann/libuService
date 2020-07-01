@@ -7,9 +7,9 @@
 
 #include <string>
 #include <boost/beast/http.hpp>
-#include "de.mabiphmo/uService/server/session.h"
+#include <mabiphmo/uService/server/Session.h>
 
-namespace de::mabiphmo::uService::resources {
+namespace mabiphmo::uService::resources {
 	enum class resource_type {
 		create,            //POST
 		read,            //GET
@@ -18,7 +18,7 @@ namespace de::mabiphmo::uService::resources {
 		execute,        //PATCH
 	};
 
-	struct resource {
+	struct Resource {
 		std::string path = std::string();
 		std::vector<resource_type> allowed_types = std::vector<resource_type>();
 		std::vector<std::string> allowed_scopes = std::vector<std::string>();

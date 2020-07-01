@@ -12,19 +12,19 @@
 #include <iostream>
 #include <boost/beast/core/bind_handler.hpp>
 #include <boost/asio/strand.hpp>
-#include "session.h"
+#include "Session.h"
 
-namespace de::mabiphmo::uService::server {
-	class listener : public std::enable_shared_from_this<listener> {
+namespace mabiphmo::uService::server {
+	class Listener : public std::enable_shared_from_this<Listener> {
 		boost::asio::io_context &ioc_;
 		boost::asio::ssl::context ssl_context_;
 		boost::asio::ip::tcp::acceptor acceptor_;
 		settings &settings_;
 	public:
-		listener(boost::asio::io_context &ioc,
-				 boost::asio::ssl::context &&ssl_context,
-				 const boost::asio::ip::tcp::endpoint &endpoint,
-				 settings &settings)
+		Listener(boost::asio::io_context &ioc,
+                 boost::asio::ssl::context &&ssl_context,
+                 const boost::asio::ip::tcp::endpoint &endpoint,
+                 settings &settings)
 				: ioc_(ioc),
 				  ssl_context_(ssl_context),
 				  acceptor_(ioc),
@@ -65,7 +65,7 @@ namespace de::mabiphmo::uService::server {
 		void do_accept(){
 			acceptor_.async_accept(boost::asio::make_strand(ioc_),
 								   boost::beast::bind_front_handler(
-							&listener::on_accept,
+							&Listener::on_accept,
 							shared_from_this()));
 		}
 
@@ -74,7 +74,7 @@ namespace de::mabiphmo::uService::server {
 				std::cerr << "accept failed: " << ec_.message() << std::endl;
 			}
 			else{
-				std::make_shared<session>(std::move(socket_), ssl_context_, settings_)->run();
+				std::make_shared<Session>(std::move(socket_), ssl_context_, settings_)->run();
 			}
 
 			do_accept();

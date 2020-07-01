@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
-project(libuService)
+project(uService)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(libuService src/dummy.cpp include/de.mabiphmo/uService/settings.h include/de.mabiphmo/uService/resources/resource.h include/de.mabiphmo/uService/server/server.h include/de.mabiphmo/uService/server/session.h include/de.mabiphmo/uService/resources/resource_typed_body.h include/de.mabiphmo/uService/server/listener.h include/de.mabiphmo/uService/auth/auth_service.h include/de.mabiphmo/uService/auth/bearer_token.h)
+add_library(uService include/mabiphmo/uService/settings.h include/mabiphmo/uService/resources/Resource.h include/mabiphmo/uService/server/Server.h include/mabiphmo/uService/server/Session.h include/mabiphmo/uService/resources/ResourceTypedBody.h include/mabiphmo/uService/server/Listener.h include/mabiphmo/uService/auth/AuthService.h include/mabiphmo/uService/auth/BearerToken.h src/main.cpp src/construction/AppBuilder.cpp src/construction/AppBuilder.h src/construction/AppLayerBuilder.cpp src/construction/AppLayerBuilder.h include/mabiphmo/uService/construction/IAppLayerBuilder.h include/mabiphmo/uService/construction/IAppBuilder.h)
 
 include_directories(include)
 
@@ -12,4 +12,4 @@ find_package(Boost REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIR})
 
-target_link_libraries(libuService ${BOOST_LIB_DIR})
+target_link_libraries(uService ${BOOST_LIB_DIR})

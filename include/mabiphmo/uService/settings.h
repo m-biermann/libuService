@@ -8,11 +8,11 @@
 #include <vector>
 #include <string>
 #include <boost/asio/ssl/context.hpp>
-#include <de.mabiphmo/uService/resources/resource.h>
+#include <mabiphmo/uService/resources/Resource.h>
 
-namespace de::mabiphmo::uService {
+namespace mabiphmo::uService {
 	struct settings {
-		std::vector<resources::resource> resources = std::vector<resources::resource>();
+		std::vector<resources::Resource> resources = std::vector<resources::Resource>();
 		uint thread_num = 10;
 
 		struct ssl_settings_{

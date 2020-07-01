@@ -2,17 +2,17 @@
 // Created by max on 4/24/20.
 //
 
-#ifndef LIBUSERVICE_AUTH_SERVICE_H
-#define LIBUSERVICE_AUTH_SERVICE_H
+#ifndef LIBUSERVICE_AUTHSERVICE_H
+#define LIBUSERVICE_AUTHSERVICE_H
 
 #include <string>
 #include <boost/asio/ip/tcp.hpp>
-#include <de.mabiphmo/uService/settings.h>
+#include <mabiphmo/uService/settings.h>
 #include <boost/asio/strand.hpp>
 #include <iostream>
-#include "bearer_token.h"
+#include "BearerToken.h"
 
-namespace de::mabiphmo::uService::auth {
+namespace mabiphmo::uService::auth {
 	class auth_exception : public std::runtime_error {
 	public:
 		explicit auth_exception(
@@ -23,13 +23,13 @@ namespace de::mabiphmo::uService::auth {
 				: std::runtime_error("") {}
 	};
 
-	class auth_service : public std::enable_shared_from_this<auth_service> {
+	class AuthService : public std::enable_shared_from_this<AuthService> {
 		settings &settings_;
 		boost::asio::io_context &ioc_;
 		X509 *auth_certificate_ = nullptr;
 		boost::asio::steady_timer timer_;
 	public:
-		auth_service(
+		AuthService(
 				settings &settings,
 				boost::asio::io_context &ioc)
 				: settings_(settings),
@@ -38,7 +38,7 @@ namespace de::mabiphmo::uService::auth {
 			init();
 		}
 
-		~auth_service() {
+		~AuthService() {
 			if (auth_certificate_ != nullptr) {
 				X509_free(auth_certificate_);
 				auth_certificate_ = nullptr;
@@ -76,14 +76,14 @@ namespace de::mabiphmo::uService::auth {
                 std::shared_ptr<boost::asio::steady_timer> t =
                         std::make_shared<boost::asio::steady_timer>(ioc_,boost::asio::chrono::minutes(10));
                 t->async_wait(boost::beast::bind_front_handler(
-                        &auth_service::edit_discovery_retry_on_timer,
+                        &AuthService::edit_discovery_retry_on_timer,
                         shared_from_this()));
 			} else {
 			    //retry every 10 seconds
 				std::shared_ptr<boost::asio::steady_timer> t =
 				        std::make_shared<boost::asio::steady_timer>(ioc_,boost::asio::chrono::seconds(30));
 				t->async_wait(boost::beast::bind_front_handler(
-						&auth_service::edit_discovery_retry_on_timer,
+						&AuthService::edit_discovery_retry_on_timer,
 						shared_from_this()));
 			}
 		}
@@ -94,4 +94,4 @@ namespace de::mabiphmo::uService::auth {
 	};
 }
 
-#endif //LIBUSERVICE_AUTH_SERVICE_H
+#endif //LIBUSERVICE_AUTHSERVICE_H

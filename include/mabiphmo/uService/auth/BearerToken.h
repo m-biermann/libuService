@@ -6,10 +6,10 @@
 #define LIBUSERVICE_BEARER_TOKEN_H
 
 #include <string>
-#include "auth_service.h"
+#include "AuthService.h"
 
-namespace de::mabiphmo::uService::auth {
-	class bearer_token {
+namespace mabiphmo::uService::auth {
+	class BearerToken {
 		std::string token_;
 		std::vector<std::string> scopes_;
 		std::string id_;
@@ -17,7 +17,7 @@ namespace de::mabiphmo::uService::auth {
 	    /// Creates a token object from the encrypted representation
 	    /// \param encrypted_token
 	    /// \param auth_service
-		bearer_token(std::string &&encrypted_token, auth_service &auth_service)
+		BearerToken(std::string &&encrypted_token, AuthService &auth_service)
 				: token_(encrypted_token) {
 		    std::string decrypted_token = auth_service.decrypt(encrypted_token);
 			//TODO: token to scopes/ id
@@ -27,7 +27,7 @@ namespace de::mabiphmo::uService::auth {
 		/// \param scopes Scopes the token contains
 		/// \param id User id
 		/// \param auth_service
-		bearer_token(std::vector<std::string> &&scopes, std::string &id, auth_service &auth_service)
+		BearerToken(std::vector<std::string> &&scopes, std::string &id, AuthService &auth_service)
 				: scopes_(scopes),
 				  id_(id){
             //TODO: scopes/ id to token
