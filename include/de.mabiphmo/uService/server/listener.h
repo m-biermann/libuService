@@ -26,7 +26,7 @@ namespace de::mabiphmo::uService::server {
 				 const boost::asio::ip::tcp::endpoint &endpoint,
 				 settings &settings)
 				: ioc_(ioc),
-				  ssl_context_(std::move(ssl_context)),
+				  ssl_context_(ssl_context),
 				  acceptor_(ioc),
 				  settings_(settings)
 		{

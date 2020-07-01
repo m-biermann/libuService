@@ -8,29 +8,36 @@
 #include <vector>
 #include <string>
 #include <boost/asio/ssl/context.hpp>
-#include <resources/resource.h>
+#include <de.mabiphmo/uService/resources/resource.h>
 
 namespace de::mabiphmo::uService {
 	struct settings {
 		std::vector<resources::resource> resources = std::vector<resources::resource>();
 		uint thread_num = 10;
 
-		boost::asio::ssl::context ssl_context = boost::asio::ssl::context(boost::asio::ssl::context::tlsv13_server);
+		struct ssl_settings_{
+            boost::filesystem::path full_chain = std::string();
+            boost::filesystem::path private_key = std::string();
+		} ssl_settings;
 
-		std::string hostname = std::string();
-		boost::asio::ip::tcp::endpoint endpoint =
-				boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address("0.0.0.0"),
-											   443);
+		std::string hostname = "localhost";
+		boost::asio::address ip = boost::asio::address("0.0.0.0");
+		uint port = 443;
 
 		std::string service_id = std::string();
 		std::string service_secret = std::string();
 
-		bool service_is_auth = false;
+		struct auth_settings_{
+            bool service_is_auth = false;
 
-		boost::asio::ip::tcp::endpoint oauth_service_endpoint =
-				boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address("127.0.0.1"),
-											   443);
-		std::string oauth_service_hostname = std::string();
+            std::string oauth_service_hostname = "localhost";
+            uint oauth_service_port = 443;
+		} auth_settings;
+
+		struct file_settings_{
+		    boost::filesystem::path persistence_dir = boost::filesystem::path("");//default: cwd
+		    boost::filesystem::path settings_dir = boost::filesystem::path("");//default: cwd TODO: needed?
+		};
 	};
 }
 

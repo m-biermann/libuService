@@ -34,7 +34,7 @@ namespace de::mabiphmo::uService::auth {
 				boost::asio::io_context &ioc)
 				: settings_(settings),
 				  ioc_(ioc),
-				  timer_(ioc, boost::asio::chrono::minutes(15)) {
+				  timer_(ioc, boost::asio::chrono::minutes(15)){
 			init();
 		}
 
@@ -45,35 +45,43 @@ namespace de::mabiphmo::uService::auth {
 			}
 		}
 
-		X509 *get_auth_certificate() const {
-			if (auth_certificate_ == nullptr)
-				throw auth_exception("Auth not connected");
+		std::string encrypt(std::string &to_encrypt){
+		    if(!settings_.auth_settings.service_is_auth)
+		        throw auth_exception("Only Auth service can encrypt");
+		    //TODO: get private key and encrypt, reload private key if cert is invalid
+		    return std::string();
+		}
 
-			//TODO: if cert isn't valid right now, refresh it
-
-			return auth_certificate_;
+		std::string decrypt(std::string &to_decrypt){
+		    //TODO: get pubkey and decrypt, reload public key if cert is invalid
+		    return std::string();
 		}
 
 	private:
 		void init() {
+		    //TODO: get/ generate own auth token
 			edit_discovery_retry();
 		}
 
 		void edit_discovery_retry_on_timer(boost::system::error_code &ec) {
-			if (!ec) {
-				edit_discovery_retry();
-			} else {
-				std::cout << ec.message() << std::endl;
-			}
-		}
+            if (ec.failed()) {
+                std::cout << ec.message() << std::endl;
+            }
+            edit_discovery_retry();
+        }
 
 		void edit_discovery_retry() {
 			if (edit_discovery()) {
-				//TODO: keep-alive
+				//keep-alive every 10 minutes
+                std::shared_ptr<boost::asio::steady_timer> t =
+                        std::make_shared<boost::asio::steady_timer>(ioc_,boost::asio::chrono::minutes(10));
+                t->async_wait(boost::beast::bind_front_handler(
+                        &auth_service::edit_discovery_retry_on_timer,
+                        shared_from_this()));
 			} else {
-				std::shared_ptr<boost::asio::steady_timer> t = std::make_shared<boost::asio::steady_timer>(ioc_,
-																										   boost::asio::chrono::seconds(
-																												   30));
+			    //retry every 10 seconds
+				std::shared_ptr<boost::asio::steady_timer> t =
+				        std::make_shared<boost::asio::steady_timer>(ioc_,boost::asio::chrono::seconds(30));
 				t->async_wait(boost::beast::bind_front_handler(
 						&auth_service::edit_discovery_retry_on_timer,
 						shared_from_this()));
