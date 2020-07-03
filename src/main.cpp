@@ -15,8 +15,7 @@ int main(int argc, char *argv[]){
     if(Startup(argc, argv)){
         mabiphmo::uService::construction::AppBuilder builder;
         Configure(builder);
-        mabiphmo::uService::construction::AppLayerBuilder layerBuilder;
-        ConfigureLayers(layerBuilder);
+        ConfigureLayers(builder.GetLayerBuilder());
         //TODO: build and start
     }
     else{

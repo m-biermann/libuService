@@ -12,18 +12,6 @@
 
 namespace mabiphmo::uService {
 	struct settings {
-		std::vector<resources::Resource> resources = std::vector<resources::Resource>();
-		uint thread_num = 10;
-
-		struct ssl_settings_{
-            boost::filesystem::path full_chain = std::string();
-            boost::filesystem::path private_key = std::string();
-		} ssl_settings;
-
-		std::string hostname = "localhost";
-		boost::asio::address ip = boost::asio::address("0.0.0.0");
-		uint port = 443;
-
 		std::string service_id = std::string();
 		std::string service_secret = std::string();
 
