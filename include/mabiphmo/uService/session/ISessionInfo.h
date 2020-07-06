@@ -1,0 +1,8 @@
+//
+// Created by max on 7/6/20.
+//
+
+#ifndef USERVICE_ISESSIONINFO_H
+#define USERVICE_ISESSIONINFO_H
+
+#endif //USERVICE_ISESSIONINFO_H

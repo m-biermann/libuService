@@ -6,5 +6,12 @@
 #include "AppBuilder.h"
 
 namespace mabiphmo::uService::construction{
-	AppLayerBuilder::AppLayerBuilder(AppBuilder &appBuilder) : appBuilder_(appBuilder) {}
+	AppLayerBuilder::AppLayerBuilder(ioc::container &ioc)
+	: IAppLayerBuilder(ioc){}
+
+	layer::ILayerRunner AppLayerBuilder::Build() {
+		//TODO
+		(void)ioc_;
+		return layer::ILayerRunner();
+	}
 }

@@ -10,6 +10,7 @@
 #include <boost/beast/core/error.hpp>
 #include <string>
 #include <mutex>
+#include <mabiphmo/uService/service/IIoService.h>
 
 namespace mabiphmo::uService::listener{
 	class ListenerException : public std::runtime_error {
@@ -21,16 +22,13 @@ namespace mabiphmo::uService::listener{
 		ListenerException()
 				: std::runtime_error("") {}
 	};
-	class ListenerBase : public std::enable_shared_from_this<ListenerBase>{
+class ListenerBase : public service::IIoService, std::enable_shared_from_this<ListenerBase>{
 		boost::asio::ip::tcp::acceptor acceptor_;
 		boost::asio::ip::tcp::endpoint endpoint_;
-		boost::asio::io_context &ioc_;
-		bool running_ = false;
-		std::mutex runningMutex_ = std::mutex();
 	public:
 		ListenerBase(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint &&endpoint);
-		void Start();
-		void Stop();
+		void onStart() override;
+		void onStop() override;
 	private:
 		void doAccept();
 		void onAcceptDone(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket);

@@ -45,9 +45,11 @@ namespace mabiphmo::uService::construction{
 		return layerBuilder_;
 	}
 
-	AppBuilder::AppBuilder() : layerBuilder_(AppLayerBuilder(*this)) {}
+	AppBuilder::AppBuilder() : layerBuilder_(ioc_) {}
 
-	ioc::container &AppBuilder::GetIoC() {
-		return container_;
+	server::Server AppBuilder::Build() {
+    	layer::ILayerRunner layerRunner = layerBuilder_.Build();
+		(void)layerRunner;
+		return server::Server(std::vector<std::unique_ptr<listener::ListenerBase>>());
 	}
 }

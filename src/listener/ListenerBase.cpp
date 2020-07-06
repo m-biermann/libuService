@@ -9,7 +9,7 @@
 
 namespace mabiphmo::uService::listener{
 	ListenerBase::ListenerBase(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint &&endpoint)
-	: acceptor_(ioc), endpoint_(endpoint), ioc_(ioc) {
+	: service::IIoService(ioc), acceptor_(ioc), endpoint_(endpoint) {
 		boost::beast::error_code ec;
 
 		acceptor_.open(endpoint.protocol(), ec);
@@ -42,7 +42,7 @@ namespace mabiphmo::uService::listener{
 	}
 
 	void ListenerBase::doAccept() {
-		acceptor_.async_accept(boost::asio::make_strand(ioc_),
+		acceptor_.async_accept(boost::asio::make_strand(ioContext_),
 	                       boost::beast::bind_front_handler(
 			                       &ListenerBase::onAcceptDone,
 			                       shared_from_this()));
@@ -69,18 +69,9 @@ namespace mabiphmo::uService::listener{
 		doAccept();
 	}
 
-	void ListenerBase::Start() {
-		const std::lock_guard<std::mutex> lock(runningMutex_);
-		if(running_)
-			return;
-		running_ = true;
-
+	void ListenerBase::onStart() {
 		doAccept();
 	}
 
-	void ListenerBase::Stop() {
-		const std::lock_guard<std::mutex> lock(runningMutex_);
-
-		running_ = false;
-	}
+	void ListenerBase::onStop() {}
 }

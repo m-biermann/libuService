@@ -5,7 +5,6 @@
 #include <mabiphmo/uService/construction/IAppBuilder.h>
 #include <mabiphmo/uService/construction/IAppLayerBuilder.h>
 #include "construction/AppBuilder.h"
-#include "construction/AppLayerBuilder.h"
 
 bool Startup(int argc, char *argv[]);
 void Configure(mabiphmo::uService::construction::IAppBuilder &builder);
@@ -16,6 +15,8 @@ int main(int argc, char *argv[]){
         mabiphmo::uService::construction::AppBuilder builder;
         Configure(builder);
         ConfigureLayers(builder.GetLayerBuilder());
+	    mabiphmo::uService::server::Server server = builder.Build();
+        server.Start();
         //TODO: build and start
     }
     else{

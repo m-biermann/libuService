@@ -7,13 +7,15 @@
 
 #include <mabiphmo/uService/construction/IAppLayerBuilder.h>
 #include <mabiphmo/uService/construction/IAppBuilder.h>
+#include "../layer/ILayerRunner.h"
 
 namespace mabiphmo::uService::construction{
 	class AppBuilder;
     class AppLayerBuilder : public IAppLayerBuilder{
-    	AppBuilder &appBuilder_;
     public:
-    	explicit AppLayerBuilder(AppBuilder &appBuilder);
+    	explicit AppLayerBuilder(ioc::container &ioc);
+
+    	layer::ILayerRunner Build();
     };
 }
 
