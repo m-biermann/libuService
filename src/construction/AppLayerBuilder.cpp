@@ -3,3 +3,8 @@
 //
 
 #include "AppLayerBuilder.h"
+#include "AppBuilder.h"
+
+namespace mabiphmo::uService::construction{
+	AppLayerBuilder::AppLayerBuilder(AppBuilder &appBuilder) : appBuilder_(appBuilder) {}
+}

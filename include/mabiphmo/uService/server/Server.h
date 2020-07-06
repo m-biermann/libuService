@@ -7,7 +7,7 @@
 
 #include <mabiphmo/uService/settings.h>
 #include <mabiphmo/uService/auth/AuthService.h>
-#include "Listener.h"
+#include "../../../../src/structural/Listener.h"
 
 namespace mabiphmo::uService::server {
 	class Server {

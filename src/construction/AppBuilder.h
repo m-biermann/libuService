@@ -8,11 +8,10 @@
 #include <mabiphmo/uService/construction/IAppBuilder.h>
 #include <mabiphmo/uService/construction/IAppLayerBuilder.h>
 #include <string>
-#include "AppLayerBuilder.h"
 
 namespace mabiphmo::uService::construction{
     class AppBuilder : public IAppBuilder{
-        IAppLayerBuilder layerBuilder_ = AppLayerBuilder();
+        IAppLayerBuilder layerBuilder_;
 
         unsigned int threadCount_ = 30;
 
@@ -28,7 +27,10 @@ namespace mabiphmo::uService::construction{
 	    boost::filesystem::path fullChainPath_ = "";
 	    boost::filesystem::path privateKeyPath_ = "";
         unsigned int sslPort_ = 443;
+
+        ioc::container container_ = ioc::container();
     public:
+    	AppBuilder();
         IAppBuilder &WithClearTextPort(unsigned int portNr) override;
         IAppBuilder &WithoutClearTextPort() override;
         IAppBuilder &WithThreadCount(unsigned int threadCount) override;
@@ -36,6 +38,8 @@ namespace mabiphmo::uService::construction{
 	    IAppBuilder &WithHostname(std::string &&hostname) override;
 	    IAppBuilder &WithAddress(boost::asio::ip::address &&address) override;
         IAppLayerBuilder &GetLayerBuilder();
+    protected:
+	    ioc::container &GetIoC() override;
     };
 }
 

@@ -6,10 +6,14 @@
 #define LIBUSERVICE_APPLAYERBUILDER_H
 
 #include <mabiphmo/uService/construction/IAppLayerBuilder.h>
+#include <mabiphmo/uService/construction/IAppBuilder.h>
 
 namespace mabiphmo::uService::construction{
+	class AppBuilder;
     class AppLayerBuilder : public IAppLayerBuilder{
-        //TODO
+    	AppBuilder &appBuilder_;
+    public:
+    	explicit AppLayerBuilder(AppBuilder &appBuilder);
     };
 }
 

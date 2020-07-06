@@ -10,6 +10,7 @@
 #include "IAppLayerBuilder.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/asio/ip/address.hpp>
+#include <mabiphmo/uService/ioc/container.h>
 
 namespace mabiphmo::uService::construction {
 	class IAppBuilder {
@@ -45,6 +46,38 @@ namespace mabiphmo::uService::construction {
 		/// \param address IP address (IPv4 / IPv6)
 		/// \return this for chaining
 		virtual IAppBuilder &WithAddress(boost::asio::ip::address &&address) = 0;
+
+		template <class TService, typename ...TDependencies>
+		IAppBuilder &WithService(unsigned int additionalArgs, ...){
+			ioc::container &ioc = GetIoC();
+			if(additionalArgs > 0){
+				va_list vList;
+				va_start(vList, additionalArgs);
+				ioc.RegisterSingletonClass<TService, TDependencies...>(vList);
+				va_end(vList);
+			}
+			else{
+				ioc.RegisterSingletonClass<TService, TDependencies...>();
+			}
+			return *this;
+		}
+
+		template <class TInterface, class TService, typename ...TDependencies>
+		IAppBuilder &WithServiceOnInterface(unsigned int additionalArgs, ...){
+			ioc::container &ioc = GetIoC();
+			if(additionalArgs > 0){
+				va_list vList;
+				va_start(vList, additionalArgs);
+				ioc.RegisterSingletonClassOnInterface<TInterface, TService, TDependencies...>(vList);
+				va_end(vList);
+			}
+			else{
+				ioc.RegisterSingletonClassOnInterface<TInterface, TService, TDependencies...>();
+			}
+			return *this;
+		}
+	protected:
+		virtual ioc::container &GetIoC() = 0;
 	};
 }
 

@@ -3,6 +3,7 @@
 //
 
 #include "AppBuilder.h"
+#include "AppLayerBuilder.h"
 
 namespace mabiphmo::uService::construction{
     IAppBuilder &AppBuilder::WithClearTextPort(unsigned int portNr) {
@@ -42,5 +43,11 @@ namespace mabiphmo::uService::construction{
 
 	IAppLayerBuilder &AppBuilder::GetLayerBuilder() {
 		return layerBuilder_;
+	}
+
+	AppBuilder::AppBuilder() : layerBuilder_(AppLayerBuilder(*this)) {}
+
+	ioc::container &AppBuilder::GetIoC() {
+		return container_;
 	}
 }
