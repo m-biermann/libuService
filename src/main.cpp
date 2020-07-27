@@ -15,8 +15,8 @@ int main(int argc, char *argv[]){
         mabiphmo::uService::construction::AppBuilder builder;
         Configure(builder);
         ConfigureLayers(builder.GetLayerBuilder());
-	    mabiphmo::uService::server::Server server = builder.Build();
-        server.Start();
+	    std::shared_ptr<mabiphmo::uService::server::Server> server = builder.Build();
+        server->Start();
         //TODO: build and start
     }
     else{

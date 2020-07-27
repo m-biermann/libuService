@@ -15,7 +15,6 @@ namespace mabiphmo::uService::construction{
     public:
     	explicit AppLayerBuilder(ioc::container &ioc);
 
-    	layer::ILayerRunner Build();
     };
 }
 

@@ -4,25 +4,24 @@
 
 #include "AppBuilder.h"
 #include "AppLayerBuilder.h"
+#include "../listener/ClearTextListener.h"
+#include <tuple>
 
 namespace mabiphmo::uService::construction{
-    IAppBuilder &AppBuilder::WithClearTextPort(unsigned int portNr) {
-        clearTextEnabled_ = true;
-        clearTextPort_ = portNr;
+	AppBuilder::AppBuilder() : layerBuilder_(iocContainer_) {
+		iocContainer_.RegisterSingletonClassFactory<boost::asio::io_context, std::tuple<>>(30);
+	}
+
+    IAppBuilder &AppBuilder::WithClearText(unsigned int portNr, boost::asio::ip::address &&address) {
+        return WithService<listener::ClearTextListener, std::tuple<boost::asio::io_context>>(boost::asio::ip::tcp::endpoint(address, portNr));
+    }
+
+	IAppBuilder &AppBuilder::WithThreadCount(unsigned int threadCount) {
+		iocContainer_.RegisterSingletonClassFactory<boost::asio::io_context, std::tuple<>>(threadCount);
         return *this;
     }
 
-    IAppBuilder &AppBuilder::WithoutClearTextPort() {
-        clearTextEnabled_ = false;
-        return *this;
-    }
-
-    IAppBuilder &AppBuilder::WithThreadCount(unsigned int threadCount) {
-        threadCount_ = threadCount;
-        return *this;
-    }
-
-    IAppBuilder &AppBuilder::WithSsl(boost::filesystem::path &&fullChainPath, boost::filesystem::path &&privateKeyPath, unsigned int portNr) {
+    IAppBuilder &AppBuilder::WithSsl(boost::filesystem::path &&fullChainPath, boost::filesystem::path &&privateKeyPath, unsigned int portNr, boost::asio::ip::address &&address) {
         sslEnabled_ = true;
         fullChainPath_ = fullChainPath;
         privateKeyPath_ = privateKeyPath;
@@ -45,11 +44,11 @@ namespace mabiphmo::uService::construction{
 		return layerBuilder_;
 	}
 
-	AppBuilder::AppBuilder() : layerBuilder_(ioc_) {}
-
-	server::Server AppBuilder::Build() {
-    	layer::ILayerRunner layerRunner = layerBuilder_.Build();
-		(void)layerRunner;
-		return server::Server(std::vector<std::unique_ptr<listener::ListenerBase>>());
+	std::shared_ptr<server::Server> AppBuilder::Build() {
+		std::vector<std::shared_ptr<service::IIoService>> iIoServices = std::vector<std::shared_ptr<service::IIoService>>();
+		for(std::function<std::shared_ptr<service::IIoService> (ioc::container &)> &factory : iIoServiceFactories_){
+			iIoServices.emplace_back(factory(iocContainer_));
+		}
+		return std::make_shared<server::Server>(std::move(iIoServices));
 	}
 }

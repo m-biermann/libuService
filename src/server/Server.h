@@ -10,9 +10,9 @@
 
 namespace mabiphmo::uService::server{
 	class Server{
-		std::vector<std::unique_ptr<listener::ListenerBase>> listener_;
+		std::vector<service::IIoService> listener_;
 	public:
-		explicit Server(std::vector<std::unique_ptr<listener::ListenerBase>> &&listener);
+		explicit Server(std::vector<std::shared_ptr<service::IIoService>> &&listener);
 		void Start();
 		void Stop();
 	};

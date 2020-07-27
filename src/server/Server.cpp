@@ -5,19 +5,17 @@
 #include "Server.h"
 
 namespace mabiphmo::uService::server{
-	Server::Server(std::vector<std::unique_ptr<listener::ListenerBase>> &&listener) {
-		listener_ = std::move(listener);
-	}
+	Server::Server(std::vector<service::IIoService> &&listener) : listener_(std::move(listener)) {}
 
 	void Server::Start() {
-		for(std::unique_ptr<listener::ListenerBase> &listener : listener_){
-			listener->Start();
+		for(service::IIoService &listener : listener_){
+			listener.Start();
 		}
 	}
 
 	void Server::Stop() {
-		for(std::unique_ptr<listener::ListenerBase> &listener : listener_){
-			listener->Stop();
+		for(service::IIoService &listener : listener_){
+			listener.Stop();
 		}
 	}
 }

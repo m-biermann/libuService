@@ -11,18 +11,15 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <mabiphmo/uService/ioc/container.h>
+#include <mabiphmo/uService/service/IIoService.h>
 
 namespace mabiphmo::uService::construction {
 	class IAppBuilder {
 	public:
-		/// Enables clear text, sets a port for it (default: enabled, port 80)
+		/// Enables clear text, sets a port for it
 		/// \param portNr Port number
 		/// \return this for chaining
-		virtual IAppBuilder &WithClearTextPort(unsigned int portNr) = 0;
-
-		/// Disables clear text (default: enabled)
-		/// \return this for chaining
-		virtual IAppBuilder &WithoutClearTextPort() = 0;
+		virtual IAppBuilder &WithClearText(unsigned int portNr, boost::asio::ip::address &&address) = 0;
 
 		/// Sets the thread count, (default: 30)
 		/// \param threadCount Thread count
@@ -35,7 +32,7 @@ namespace mabiphmo::uService::construction {
 		/// \param portNr Port number
 		/// \return this for chaining
 		virtual IAppBuilder &
-		WithSsl(boost::filesystem::path &&fullChainPath, boost::filesystem::path &&privateKeyPath, unsigned int portNr) = 0;
+		WithSsl(boost::filesystem::path &&fullChainPath, boost::filesystem::path &&privateKeyPath, unsigned int portNr, boost::asio::ip::address &&address) = 0;
 
 		/// Sets the hostname to match with HTTP Header (default: ignore header)
 		/// \param hostname Hostname to match with HTTP Header
@@ -47,35 +44,34 @@ namespace mabiphmo::uService::construction {
 		/// \return this for chaining
 		virtual IAppBuilder &WithAddress(boost::asio::ip::address &&address) = 0;
 
-		template <class TService, typename ...TDependencies>
-		IAppBuilder &WithService(unsigned int additionalArgs, ...){
-			if(additionalArgs > 0){
-				va_list vList;
-				va_start(vList, additionalArgs);
-				ioc_.RegisterSingletonClass<TService, TDependencies...>(vList);
-				va_end(vList);
+		template <class TService,
+				template<typename ...TDependencies> class T, typename ...TDependencies,
+				typename... TArgs>
+		IAppBuilder &WithService(TArgs...args){
+			if(std::is_base_of<service::IIoService, TService>::value){
+				iIoServiceFactories_.emplace_back([](ioc::container &iocContainer){
+					return iocContainer.GetInstance<TService>();
+				});
 			}
-			else{
-				ioc_.RegisterSingletonClass<TService, TDependencies...>();
-			}
+			iocContainer_.RegisterSingletonClassFactory<TService, std::vector<TDependencies...>>(args ...);
 			return *this;
 		}
 
-		template <class TInterface, class TService, typename ...TDependencies>
-		IAppBuilder &WithServiceOnInterface(unsigned int additionalArgs, ...){
-			if(additionalArgs > 0){
-				va_list vList;
-				va_start(vList, additionalArgs);
-				ioc_.RegisterSingletonClassOnInterface<TInterface, TService, TDependencies...>(vList);
-				va_end(vList);
+		template <class TInterface, class TService,
+				template<typename ...TDependencies> class T, typename ...TDependencies,
+				typename... TArgs>
+		IAppBuilder &WithServiceOnInterface(TArgs...args){
+			if(std::is_base_of<service::IIoService, TInterface>::value){
+				iIoServiceFactories_.emplace_back([](ioc::container &iocContainer){
+					return iocContainer.GetInstance<TInterface>();
+				});
 			}
-			else{
-				ioc_.RegisterSingletonClassOnInterface<TInterface, TService, TDependencies...>();
-			}
+			iocContainer_.RegisterSingletonClassFactoryOnInterface<TInterface, TService, std::vector<TDependencies...>>(args...);
 			return *this;
 		}
 	protected:
-		ioc::container ioc_ = ioc::container();
+		ioc::container iocContainer_ = ioc::container();
+		std::vector<std::function<std::shared_ptr<service::IIoService> (ioc::container &)>> iIoServiceFactories_ = std::vector<std::function<std::shared_ptr<service::IIoService> (ioc::container &)>>();
 	};
 }
 

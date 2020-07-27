@@ -31,14 +31,14 @@ namespace mabiphmo::uService::construction{
         unsigned int sslPort_ = 443;
     public:
     	AppBuilder();
-        IAppBuilder &WithClearTextPort(unsigned int portNr) override;
-        IAppBuilder &WithoutClearTextPort() override;
-        IAppBuilder &WithThreadCount(unsigned int threadCount) override;
-        IAppBuilder &WithSsl(boost::filesystem::path &&fullChainPath, boost::filesystem::path &&privateKeyPath, unsigned int portNr) override;
+        IAppBuilder &WithClearText(unsigned int portNr, boost::asio::ip::address &&address) override;
+
+	    IAppBuilder &WithThreadCount(unsigned int threadCount) override;
+        IAppBuilder &WithSsl(boost::filesystem::path &&fullChainPath, boost::filesystem::path &&privateKeyPath, unsigned int , boost::asio::ip::address &&address) override;
 	    IAppBuilder &WithHostname(std::string &&hostname) override;
 	    IAppBuilder &WithAddress(boost::asio::ip::address &&address) override;
         IAppLayerBuilder &GetLayerBuilder();
-        server::Server Build();
+        std::shared_ptr<server::Server> Build();
     };
 }
 

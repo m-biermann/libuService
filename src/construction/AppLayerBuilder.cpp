@@ -9,9 +9,4 @@ namespace mabiphmo::uService::construction{
 	AppLayerBuilder::AppLayerBuilder(ioc::container &ioc)
 	: IAppLayerBuilder(ioc){}
 
-	layer::ILayerRunner AppLayerBuilder::Build() {
-		//TODO
-		(void)ioc_;
-		return layer::ILayerRunner();
-	}
 }
