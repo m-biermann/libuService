@@ -10,9 +10,9 @@
 namespace mabiphmo::uService::listener{
 	class ClearTextListener : public ListenerBase{
 	public:
-		ClearTextListener(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint&& endpoint);
+		ClearTextListener(const std::shared_ptr<boost::asio::io_context>& ioc, boost::asio::ip::tcp::endpoint&& endpoint);
 	protected:
-		void onAccept(boost::asio::ip::tcp::socket &&socket);
+		void onAccept(boost::asio::ip::tcp::socket &&socket) override;
 	};
 }
 

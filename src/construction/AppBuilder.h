@@ -36,7 +36,6 @@ namespace mabiphmo::uService::construction{
 	    IAppBuilder &WithThreadCount(unsigned int threadCount) override;
         IAppBuilder &WithSsl(boost::filesystem::path &&fullChainPath, boost::filesystem::path &&privateKeyPath, unsigned int , boost::asio::ip::address &&address) override;
 	    IAppBuilder &WithHostname(std::string &&hostname) override;
-	    IAppBuilder &WithAddress(boost::asio::ip::address &&address) override;
         IAppLayerBuilder &GetLayerBuilder();
         std::shared_ptr<server::Server> Build();
     };

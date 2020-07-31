@@ -5,17 +5,17 @@
 #include "Server.h"
 
 namespace mabiphmo::uService::server{
-	Server::Server(std::vector<service::IIoService> &&listener) : listener_(std::move(listener)) {}
+	Server::Server(std::vector<std::shared_ptr<service::IStartableService>> &&startableServices) : startableServices_(std::move(startableServices)) {}
 
-	void Server::Start() {
-		for(service::IIoService &listener : listener_){
-			listener.Start();
+	void Server::onStart() {
+		for(const std::shared_ptr<service::IStartableService>& startableService : startableServices_){
+			startableService->Start();
 		}
 	}
 
-	void Server::Stop() {
-		for(service::IIoService &listener : listener_){
-			listener.Stop();
+	void Server::onStop() {
+		for(const std::shared_ptr<service::IStartableService>& startableService : startableServices_){
+			startableService->Stop();
 		}
 	}
 }

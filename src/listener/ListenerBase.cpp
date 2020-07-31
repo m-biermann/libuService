@@ -8,8 +8,8 @@
 #include "ListenerBase.h"
 
 namespace mabiphmo::uService::listener{
-	ListenerBase::ListenerBase(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint &&endpoint)
-	: service::IIoService(ioc), acceptor_(ioc), endpoint_(endpoint) {
+	ListenerBase::ListenerBase(const std::shared_ptr<boost::asio::io_context>& ioc, boost::asio::ip::tcp::endpoint &&endpoint)
+	: service::IIoService(ioc), acceptor_(*ioc), endpoint_(endpoint) {
 		boost::beast::error_code ec;
 
 		acceptor_.open(endpoint.protocol(), ec);
@@ -42,7 +42,12 @@ namespace mabiphmo::uService::listener{
 	}
 
 	void ListenerBase::doAccept() {
-		acceptor_.async_accept(boost::asio::make_strand(ioContext_),
+		{
+			const std::lock_guard<std::mutex> lock(runningMutex_);
+			if(!running_)
+				return;
+		}
+		acceptor_.async_accept(boost::asio::make_strand(*ioContext_),
 	                       boost::beast::bind_front_handler(
 			                       &ListenerBase::onAcceptDone,
 			                       shared_from_this()));
@@ -50,19 +55,9 @@ namespace mabiphmo::uService::listener{
 
 	void ListenerBase::onAcceptDone(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket) {
 		if(ec){
-			{
-				const std::lock_guard<std::mutex> lock(runningMutex_);
-				std::cerr << "accept failed: " << ec.message() << std::endl;
-				if(!running_)
-					return;
-			}
+			std::cerr << "accept failed: " << ec.message() << std::endl;
 		}
 		else{
-			{
-				const std::lock_guard<std::mutex> lock(runningMutex_);
-				if(!running_)
-					return;
-			}
 			onAccept(std::move(socket));
 		}
 

@@ -4,9 +4,11 @@
 
 #include "SslListener.h"
 
+#include <utility>
+
 namespace mabiphmo::uService::listener{
 
-	SslListener::SslListener(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint &&endpoint)
+	SslListener::SslListener(const std::shared_ptr<boost::asio::io_context>& ioc, boost::asio::ip::tcp::endpoint &&endpoint)
 	: ListenerBase(ioc, std::move(endpoint)) {
 //TODO
 	}

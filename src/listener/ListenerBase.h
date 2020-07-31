@@ -26,7 +26,7 @@ class ListenerBase : public service::IIoService, std::enable_shared_from_this<Li
 		boost::asio::ip::tcp::acceptor acceptor_;
 		boost::asio::ip::tcp::endpoint endpoint_;
 	public:
-		ListenerBase(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint &&endpoint);
+		ListenerBase(const std::shared_ptr<boost::asio::io_context>& ioc, boost::asio::ip::tcp::endpoint &&endpoint);
 		void onStart() override;
 		void onStop() override;
 	private:

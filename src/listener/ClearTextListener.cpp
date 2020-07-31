@@ -6,7 +6,7 @@
 
 namespace mabiphmo::uService::listener{
 
-	ClearTextListener::ClearTextListener(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint &&endpoint)
+	ClearTextListener::ClearTextListener(const std::shared_ptr<boost::asio::io_context>& ioc, boost::asio::ip::tcp::endpoint &&endpoint)
 			: ListenerBase(ioc, std::move(endpoint)) {
 //TODO
 	}

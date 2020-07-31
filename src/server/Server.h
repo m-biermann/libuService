@@ -9,12 +9,12 @@
 #include "../listener/ListenerBase.h"
 
 namespace mabiphmo::uService::server{
-	class Server{
-		std::vector<service::IIoService> listener_;
+	class Server : public service::IStartableService{
+		std::vector<std::shared_ptr<service::IStartableService>> startableServices_;
 	public:
-		explicit Server(std::vector<std::shared_ptr<service::IIoService>> &&listener);
-		void Start();
-		void Stop();
+		explicit Server(std::vector<std::shared_ptr<service::IStartableService>> &&startableServices);
+		void onStart() override;
+		void onStop() override;
 	};
 }
 

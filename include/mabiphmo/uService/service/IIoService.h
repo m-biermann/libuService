@@ -6,33 +6,14 @@
 #define USERVICE_IIOSERVICE_H
 
 #include <boost/asio/io_context.hpp>
+#include "IStartableService.h"
 
 namespace mabiphmo::uService::service{
-	class IIoService{
-		//TODO
+	class IIoService : public IStartableService{
 	protected:
-		boost::asio::io_context &ioContext_;
-		bool running_ = false;
-		std::mutex runningMutex_ = std::mutex();
-		virtual void onStart() = 0;
-		virtual void onStop() = 0;
+		std::shared_ptr<boost::asio::io_context> ioContext_;
 	public:
-		explicit IIoService(boost::asio::io_context &ioContext) : ioContext_(ioContext){}
-		void Start(){
-			const std::lock_guard<std::mutex> lock(runningMutex_);
-			if(running_)
-				return;
-			running_ = true;
-
-			onStart();
-		}
-		void Stop(){
-			const std::lock_guard<std::mutex> lock(runningMutex_);
-
-			running_ = false;
-
-			onStop();
-		}
+		explicit IIoService(std::shared_ptr<boost::asio::io_context> ioContext) : ioContext_(std::move(ioContext)){}
 	};
 }
 #endif //USERVICE_IIOSERVICE_H

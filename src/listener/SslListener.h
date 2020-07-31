@@ -10,7 +10,7 @@
 namespace mabiphmo::uService::listener{
 	class SslListener : public ListenerBase{
 	public:
-		SslListener(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint&& endpoint);
+		SslListener(const std::shared_ptr<boost::asio::io_context>& ioc, boost::asio::ip::tcp::endpoint&& endpoint);
 	protected:
 		void onAccept(boost::asio::ip::tcp::socket &&socket);
 	};

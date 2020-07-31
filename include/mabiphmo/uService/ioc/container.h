@@ -13,7 +13,7 @@
 #include <functional>
 
 namespace mabiphmo::uService::ioc{
-	class container{
+class container : public std::enable_shared_from_this<container>{
 	private:
 		class IHolder
 		{
@@ -28,17 +28,18 @@ namespace mabiphmo::uService::ioc{
 			std::shared_ptr<T> instance_;
 		};
 
-		class ICreatorHolder{
+		class ICreatorHolder {
 		public:
 			virtual ~ICreatorHolder()= default;
 		};
-		template <class T>
+		template<class T>
 		class CreatorHolder : public ICreatorHolder{
-			std::function<T*()> factory_;
+			std::function<std::shared_ptr<T>()> lambda_;
 		public:
-			explicit CreatorHolder(std::function<T*()> &&factory) : factory_(factory){}
-			T* operator()(){
-				return factory_();
+			~CreatorHolder() override = default;
+			explicit CreatorHolder(std::function<std::shared_ptr<T>()> &&lambda) : lambda_(std::move(lambda)){}
+			std::shared_ptr<T> operator()(){
+				return lambda_();
 			}
 		};
 
@@ -47,105 +48,146 @@ namespace mabiphmo::uService::ioc{
 
 	public:
 		template <class T,
-				template<typename ...Ts> class TUnused, typename... Ts,
+				typename... TDependencies,
 				typename ...TArgs>
-		std::shared_ptr<T> RegisterSingletonClass(TArgs...args)
+		std::shared_ptr<T> RegisterSingletonClass(TArgs &&...args)
 		{
-			std::shared_ptr<Holder<T>> holder = std::make_shared<Holder<T>>();
-			holder->instance_ = std::make_shared<T>(GetInstance<Ts>()..., args...);
+			std::string typeKey = typeid(T).name();
+			std::shared_ptr<Holder<T>> holder;
+			if(instanceMap_.find(typeKey) != instanceMap_.end()){
+				holder = std::dynamic_pointer_cast<Holder<T>>(instanceMap_[typeKey]);
+			}
+			else{
+				holder = std::make_shared<Holder<T>>();
+				instanceMap_[typeKey] = holder;
+			}
 
-			instanceMap_[typeid(T).name()] = holder;
+			holder->instance_ = std::make_shared<T>(GetInstance<TDependencies>()..., std::forward(args)...);
 
 			return holder->instance_;
 		}
 
 		template <class TInterface, class T,
-				template<typename ...Ts> class TUnused, typename... Ts,
+				typename... TDependencies,
 				typename ...TArgs>
-		std::shared_ptr<TInterface> RegisterSingletonClassOnInterface(TArgs...args)
+		std::shared_ptr<TInterface> RegisterSingletonClassOnInterface(TArgs &&...args)
 		{
 			static_assert(std::is_base_of<TInterface, T>::value, "Type has to inherit the interface it's supposed to be registered on");
-			std::shared_ptr<Holder<TInterface>> holder = std::make_shared<Holder<TInterface>>();
-			holder->instance_ = std::shared_ptr<TInterface>(new T(GetInstance<Ts>()..., args...));
 
-			instanceMap_[typeid(TInterface).name()] = holder;
+			std::string typeKey = typeid(TInterface).name();
+			std::shared_ptr<Holder<TInterface>> holder;
+			if(instanceMap_.find(typeKey) != instanceMap_.end()){
+				holder = std::dynamic_pointer_cast<Holder<TInterface>>(instanceMap_[typeKey]);
+			}
+			else{
+				holder = std::make_shared<Holder<TInterface>>();
+				instanceMap_[typeKey] = holder;
+			}
+
+			holder->instance_ = std::make_shared<T>(GetInstance<TDependencies>()..., std::forward(args)...);
 
 			return holder->instance_;
 		}
 
 		template <class T,
-				template<typename ...Ts> class TUnused, typename... Ts,
+				typename... TDependencies,
 				typename ...TArgs>
-		void RegisterSingletonClassFactory(TArgs...args)
+		void RegisterSingletonClassFactory(TArgs &&...args)
 		{
 			std::string typeKey = typeid(T).name();
-			creatorMap_[typeKey] = std::make_shared<CreatorHolder<T>>([this, args...](){
-				return new T(GetInstance<Ts>()..., args...);
-			});
+			creatorMap_[typeKey] = std::make_shared<CreatorHolder<T>>(
+				[this, &args...]() -> std::shared_ptr<T>
+		        {
+					return std::make_shared<T>(
+						GetInstance<TDependencies>()...,
+				        std::forward<TArgs>(args)...);
+		        });
 
-			std::shared_ptr<IHolder> iHolder = instanceMap_[typeKey];
-			auto * holder = dynamic_cast<Holder<T>*>(iHolder.get());
-			holder->instance_ = nullptr;
+			if(instanceMap_.find(typeKey) != instanceMap_.end()){
+				auto holder = std::dynamic_pointer_cast<Holder<T>>(instanceMap_[typeKey]);
+				holder->instance_.reset();
+			}
+			else{
+				auto holder = std::make_shared<Holder<T>>();
+				instanceMap_[typeKey] = holder;
+			}
 		}
 
 		template <class TInterface, class T,
-				template<typename ...Ts> class TUnused, typename... Ts,
+				typename... TDependencies,
 				typename ...TArgs>
-		void RegisterSingletonClassFactoryOnInterface(TArgs...args)
+		void RegisterSingletonClassFactoryOnInterface(TArgs &&...args)
 		{
 			static_assert(std::is_base_of<TInterface, T>::value, "Type has to inherit the interface it's supposed to be registered on");
 			std::string typeKey = typeid(TInterface).name();
-			creatorMap_[typeKey] = std::make_shared<CreatorHolder<TInterface>>([this, args...](){
-				return dynamic_cast<TInterface *>(new T(GetInstance<Ts>()..., args...));
-			});
+			creatorMap_[typeKey] = std::make_shared<CreatorHolder<TInterface>>(
+				[this, &args...]() -> std::shared_ptr<TInterface>
+		        {
+					return std::make_shared<T>(
+						GetInstance<TDependencies>()...,
+				        std::forward<TArgs>(args)...);
+		        });
 
-			std::shared_ptr<IHolder> iHolder = instanceMap_[typeKey];
-			auto * holder = dynamic_cast<Holder<TInterface>*>(iHolder.get());
-			holder->instance_ = nullptr;
+			if(instanceMap_.find(typeKey) != instanceMap_.end()){
+				auto holder = std::dynamic_pointer_cast<Holder<TInterface>>(instanceMap_[typeKey]);
+				holder->instance_.reset();
+			}
+			else{
+				auto holder = std::make_shared<Holder<TInterface>>();
+				instanceMap_[typeKey] = holder;
+			}
 		}
 
 		template <class T,
-				template<typename ...Ts> class TUnused, typename... Ts,
+				typename... TDependencies,
 				typename ...TArgs>
-		void RegisterClassFactory(TArgs...args)
+		void RegisterClassFactory(TArgs &&...args)
 		{
 			std::string typeKey = typeid(T).name();
-			creatorMap_[typeKey] = std::make_shared<CreatorHolder<T>>([this, args...](){
-				return new T(GetInstance<Ts>()..., args...);
-			});
+			creatorMap_[typeKey] = std::make_shared<CreatorHolder<T>>(
+				[this, &args...]() -> std::shared_ptr<T>
+				{
+					return std::make_shared<T>(
+							GetInstance<TDependencies>()...,
+							std::forward<TArgs>(args)...);
+				});
 		}
 
 		template <class TInterface, class T,
-				template<typename ...Ts> class TUnused, typename... Ts,
+				typename... TDependencies,
 				typename ...TArgs>
-		void RegisterClassFactoryOnInterface(TArgs...args)
+		void RegisterClassFactoryOnInterface(TArgs &&...args)
 		{
 			static_assert(std::is_base_of<TInterface, T>::value, "Type has to inherit the interface it's supposed to be registered on");
 			std::string typeKey = typeid(TInterface).name();
-			creatorMap_[typeKey] = std::make_shared<CreatorHolder<TInterface>>([this, args...](){
-				return dynamic_cast<TInterface *>(new T(GetInstance<Ts>()..., args...));
-			});
+			creatorMap_[typeKey] = std::make_shared<CreatorHolder<TInterface>>(
+					[this, &args...]() -> std::shared_ptr<TInterface>
+					{
+						return std::make_shared<T>(
+								GetInstance<TDependencies>()...,
+								std::forward<TArgs>(args)...);
+					});
 		}
 
 		template <class T>
 		std::shared_ptr<T> GetInstance()
 		{
 			std::string typeName = typeid(T).name();
-			if(typeName == typeid(container).name())
-				return this;
+			if constexpr(std::is_same<T, container>::value)
+				return shared_from_this();
 			if(instanceMap_.find(typeName) != instanceMap_.end()){
-				std::shared_ptr<IHolder> iHolder = instanceMap_[typeName];
-				auto * holder = dynamic_cast<Holder<T>*>(iHolder.get());
+				std::shared_ptr<Holder<T>> holder =
+						std::dynamic_pointer_cast<Holder<T>>(instanceMap_[typeName]);
 				if(holder->instance_ == nullptr){
-					std::shared_ptr<ICreatorHolder> iCreatorHolder = creatorMap_.at(typeName);
-					auto * creatorHolder = dynamic_cast<CreatorHolder<T>*>(iCreatorHolder.get());
+					std::shared_ptr<CreatorHolder<T>> creatorHolder =
+							std::dynamic_pointer_cast<CreatorHolder<T>>(instanceMap_[typeName]);
 					holder->instance_ = (*creatorHolder)();
 				}
 
 				return holder->instance_;
 			}
-			std::shared_ptr<ICreatorHolder> iCreatorHolder = creatorMap_.at(typeName);
-			auto * creatorHolder = dynamic_cast<CreatorHolder<T>*>(iCreatorHolder.get());
+			std::shared_ptr<CreatorHolder<T>> creatorHolder =
+					std::dynamic_pointer_cast<CreatorHolder<T>>(instanceMap_[typeName]);
 			return (*creatorHolder)();
 		}
 	};

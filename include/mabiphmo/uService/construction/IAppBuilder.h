@@ -39,39 +39,40 @@ namespace mabiphmo::uService::construction {
 		/// \return this for chaining
 		virtual IAppBuilder &WithHostname(std::string &&hostname) = 0;
 
-		/// Sets the address the server listens on (default: 0.0.0.0)
-		/// \param address IP address (IPv4 / IPv6)
-		/// \return this for chaining
-		virtual IAppBuilder &WithAddress(boost::asio::ip::address &&address) = 0;
-
 		template <class TService,
-				template<typename ...TDependencies> class T, typename ...TDependencies,
+				typename ...TDependencies,
 				typename... TArgs>
-		IAppBuilder &WithService(TArgs...args){
-			if(std::is_base_of<service::IIoService, TService>::value){
-				iIoServiceFactories_.emplace_back([](ioc::container &iocContainer){
-					return iocContainer.GetInstance<TService>();
-				});
+		IAppBuilder &WithService(TArgs &&...args){
+			if constexpr(std::is_base_of<service::IStartableService, TService>::value){
+				if(iIoServiceFactories_.find(typeid(TService).name()) != iIoServiceFactories_.end()){
+					iIoServiceFactories_.erase(typeid(TService).name());
+				}
+				iIoServiceFactories_[typeid(TService).name()] = [this]() -> std::shared_ptr<service::IStartableService> {
+					return std::dynamic_pointer_cast<service::IStartableService>(iocContainer_.GetInstance<TService>());
+				};
 			}
-			iocContainer_.RegisterSingletonClassFactory<TService, std::vector<TDependencies...>>(args ...);
+			iocContainer_.RegisterSingletonClassFactory<TService, TDependencies...>(std::forward<TArgs>(args) ...);
 			return *this;
 		}
 
 		template <class TInterface, class TService,
-				template<typename ...TDependencies> class T, typename ...TDependencies,
+				typename ...TDependencies,
 				typename... TArgs>
-		IAppBuilder &WithServiceOnInterface(TArgs...args){
-			if(std::is_base_of<service::IIoService, TInterface>::value){
-				iIoServiceFactories_.emplace_back([](ioc::container &iocContainer){
-					return iocContainer.GetInstance<TInterface>();
-				});
+		IAppBuilder &WithServiceOnInterface(TArgs &&...args){
+			if constexpr(std::is_base_of<service::IStartableService, TInterface>::value){
+				if(iIoServiceFactories_.find(typeid(TInterface).name()) != iIoServiceFactories_.end()){
+					iIoServiceFactories_.erase(typeid(TInterface).name());
+				}
+				iIoServiceFactories_[typeid(TInterface).name()] = [this]() -> std::shared_ptr<service::IStartableService> {
+					return std::dynamic_pointer_cast<service::IStartableService>(iocContainer_.GetInstance<TInterface>());
+				};
 			}
-			iocContainer_.RegisterSingletonClassFactoryOnInterface<TInterface, TService, std::vector<TDependencies...>>(args...);
+			iocContainer_.RegisterSingletonClassFactoryOnInterface<TInterface, TService, TDependencies...>(std::forward<TArgs>(args)...);
 			return *this;
 		}
 	protected:
 		ioc::container iocContainer_ = ioc::container();
-		std::vector<std::function<std::shared_ptr<service::IIoService> (ioc::container &)>> iIoServiceFactories_ = std::vector<std::function<std::shared_ptr<service::IIoService> (ioc::container &)>>();
+		std::map<std::string, std::function<std::shared_ptr<service::IStartableService> ()>> iIoServiceFactories_ = std::map<std::string, std::function<std::shared_ptr<service::IStartableService> ()>>();
 	};
 }
 
